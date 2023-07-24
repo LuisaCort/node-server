@@ -1,20 +1,21 @@
+import { resolve } from 'path'
 import readline from 'readline'
 
 let tasks = []
 const addTask = desc => {
   let id = Math.max.apply(null, [0, ...tasks.map(element => element.id)])+1
-  tasks.push({
+  return new Promise( resolve => resolve([...tasks, {
     id: id,
     desc: desc,
     state: false
-  })
+  }]))
 }
-const deleteTask = id => tasks = tasks.filter(element => element.id !== id)
-const checkTask = id => tasks = tasks.map(element => element.id !== id ? element : {
+const deleteTask = id => new Promise(resolve => resolve(tasks.filter(element => element.id !== id)))
+const checkTask = id => new Promise(resolve => resolve(tasks.map(element => element.id !== id ? element : {
   id: id,
   desc: element.desc,
   state: !element.state
-})
+})))
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -38,7 +39,7 @@ const mainThread = () => {
         break
       case "2":
         rl.question("Ingrese la descripcion de la tarea:\n", desc => {
-          addTask(desc)
+          addTask(desc).then(result => tasks = result)
           console.log("Tarea agregada✅\n")
           mainThread()
         })
@@ -46,7 +47,7 @@ const mainThread = () => {
       case "3":
         console.log(tasks)
         rl.question("Ingrese el id de la tarea a eliminar:\n", id => {
-          deleteTask(parseInt(id))
+          deleteTask(parseInt(id)).then(result => tasks = result)
           console.log("Tarea eliminada✅\n")
           mainThread()
         })
@@ -54,7 +55,7 @@ const mainThread = () => {
       case "4":
         console.log(tasks)
         rl.question("Ingrese el id de la tarea:\n", id => {
-          checkTask(parseInt(id))
+          checkTask(parseInt(id)).then(result => tasks = result)
           console.log("Tarea marcada/desmarcada✅\n")
           mainThread()
         })
