@@ -1,6 +1,22 @@
-import readline from 'readline'
+import http from 'http'
 
-let tasks = []
+let tasks = [
+  {
+    id: 0,
+    desc: "hola",
+    state: false
+  },
+  {
+    id: 1,
+    desc: "adios",
+    state: true
+  },
+  {
+    id: 2,
+    desc: "buenas",
+    state: false
+  }
+]
 const addTask = desc => {
   let id = Math.max.apply(null, [0, ...tasks.map(element => element.id)])+1
   tasks.push({
@@ -16,57 +32,10 @@ const checkTask = id => tasks = tasks.map(element => element.id !== id ? element
   state: !element.state
 })
 
-const rl = readline.createInterface({
-  input: process.stdin,
-  output: process.stdout,
-  terminal: false
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  res.write(JSON.stringify(tasks))
+  res.end()
 })
 
-const mainThread = () => {
-  console.log("🎉Bienvenidos🤖")
-  rl.question(`Seleccione la funcion a ejecutar
-    1. Ver tareas
-    2. Agregar tarea
-    3. Eliminar tarea
-    4. Marcar tarea como completada
-    5. Salir\n`,
-    answer => {
-    switch(answer){
-      case "1":
-        console.log(JSON.stringify(tasks)+"\n")
-        mainThread()
-        break
-      case "2":
-        rl.question("Ingrese la descripcion de la tarea:\n", desc => {
-          addTask(desc)
-          console.log("Tarea agregada✅\n")
-          mainThread()
-        })
-        break
-      case "3":
-        console.log(tasks)
-        rl.question("Ingrese el id de la tarea a eliminar:\n", id => {
-          deleteTask(parseInt(id))
-          console.log("Tarea eliminada✅\n")
-          mainThread()
-        })
-        break
-      case "4":
-        console.log(tasks)
-        rl.question("Ingrese el id de la tarea:\n", id => {
-          checkTask(parseInt(id))
-          console.log("Tarea marcada/desmarcada✅\n")
-          mainThread()
-        })
-        break
-      case "5":
-        console.log("Adios👋\n")
-        process.exit(0)
-      default:
-        console.log("Opcion invalida\n")
-        mainThread()
-        break
-    }
-  })
-}
-mainThread()
+server.listen(80, () => console.log('Server running on port 80'))
